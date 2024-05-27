@@ -147,7 +147,7 @@ if __name__ == "__main__":
              height=2, bd='10',bg='red', command=exit_clicked)
     exit.place(x=left, y=10)
 
-    show_hide = Button(root, text='Show/Hide', width=10, activebackground='white', fg = 'white',
+    show_hide = Button(root, text='Show/Hide', width=10, activebackground='black', fg = 'white',
              height=1, bd='10',bg='black', command=lambda: show_button([black, red, blue, green, erase, exit]))
     show_hide.place(x=left, y=bottom)
 
