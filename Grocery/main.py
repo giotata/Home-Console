@@ -9,7 +9,7 @@ from firebase_admin import storage
 from firebase_admin import firestore
 from firebase_admin.firestore import SERVER_TIMESTAMP
 
-cred = firebase_admin.credentials.Certificate('cred.json')
+cred = firebase_admin.credentials.Certificate(r'C:\Local_Code\Home-Console\Grocery\cred.json')
 default_app = firebase_admin.initialize_app(cred, {
 	'storageBucket':'grocerylist-b8759.appspot.com'
 })
@@ -56,6 +56,8 @@ handler_thread.start()
 
 color = 'black'
 on = True
+prev_x = 0
+prev_y = 0
 
 class DrawApp:
     def __init__(self, root):
@@ -66,18 +68,41 @@ class DrawApp:
         self.canvas.pack()
 
         self.canvas.bind("<B1-Motion>", self.paint)
+        self.canvas.bind("<Button-1>", self.start)
+        self.canvas.bind("<ButtonRelease-1>", self.end) 
+        
+    def start(self, event):
+        global writing
+        writing = True
+        global prev_x, prev_y
+        prev_x, prev_y = event.x, event.y
+
+    def end(self, event):
+        global writing
+        writing = False
+        custom_signal_event.set()
+
+    def roundline(self, start_x, start_y, end_x, end_y, size=1):
+        Xaxis = end_x-start_x
+        Yaxis = end_y-start_y
+        dist = max(abs(Xaxis), abs(Yaxis))
+
+        for i in range(dist):
+            x = int(start_x+float(i)/dist*Xaxis)
+            y = int(start_y+float(i)/dist*Yaxis)
+            x1, x2 = (x - size), (x + size)
+            y1, y2 = (y - size), (y + size)
+
+            self.canvas.create_oval(x1, y1, x2, y2, fill='black', outline='black', width=2)
 
     def paint(self, event):
         global color
-        if(color == "white"):
-            size = 50
-        else:
-            size = 1
-        x1, y1 = (event.x - size), (event.y - size)
-        x2, y2 = (event.x + size), (event.y + size)
-        self.canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color, width=2)
-        
-        custom_signal_event.set()
+        global prev_x, prev_y
+       
+        if(writing):
+            self.roundline(prev_x, prev_y, event.x, event.y)
+
+            prev_x, prev_y = event.x, event.y
 
 def black_clicked():
     global color
